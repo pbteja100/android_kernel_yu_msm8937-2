@@ -1,0 +1,14 @@
+qcom,tinno-3000mah {
+	qcom,max-voltage-uv = <4400000>;
+	qcom,nom-batt-capacity-mah = <3000>;
+	qcom,batt-id-kohm = <100>;
+	qcom,battery-beta = <3435>;
+	qcom,battery-type = "tinno-v3967-T-3000mah";
+	qcom,chg-rslow-comp-c1 = <3521654>;
+	qcom,chg-rslow-comp-c2 = <5211722>;
+	qcom,chg-rs-to-rslow = <957106>;
+	qcom,chg-rslow-comp-thr = <0xA9>;
+	qcom,checksum = <0x6F94>;
+	qcom,gui-version = "PMI8950GUI - 2.0.0.16";
+	qcom,fg-profile-data = < 0xf783a57d 0xb8814d7c 0x6383496f 0x7a88c28e 0x2e825199 0x4bc1dc8 0x5c110588 0x27ef981 0x867c5f83 0x16564b82 0xac8d4182 0x2b9aa7bd 0xccb5a0e 0xbd0bbe5b 0x147029fc 0xc92fba44 0x5f280000 0x2045533d 0xe6390000 0x0 0x0 0xbc70736a 0x2d8d777a 0xf17c2b72 0xd76e678 0xe975086a 0x9377fc9a 0x1dbb58a0 0x57a0710c 0x2800ff36 0xf0113003 0xc >;
+};

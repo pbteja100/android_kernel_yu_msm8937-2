@@ -1,0 +1,128 @@
+0. Copy plma_kernel_2_10_1_release_r4/tfa into sound/soc/codecs/
+	cp -r plma_kernel_2_10_1_release_r4/tfa sound/soc/codecs/tfa
+	cd sound/soc/codecs/tfa
+	rm -rf windows-inc linux-user-inc
+
+1. In sound/soc/codecs/Kconfig：
+	Add text:
+	source "sound/soc/codecs/tfa/Kconfig"
+
+2. In sound/soc/codecs/Makefile:
+	Add text:
+	obj-$(CONFIG_SND_SOC_TFA98XX) += tfa/
+
+3. In kernel/arch/arm/boot/dts/xxx.dts:
+	Add text in your i2c bus node:
+    tfa98xx: tfa98xx@34 {
+        compatible = "nxp,tfa98xx";
+        reg = <0x34>;		/* customize. */
+		reset-gpio = -1;	/* customize, if needed. */
+		irq-gpio = -1;		/* customize, if needed. */
+        status = "okay";
+    };
+
+4. In kernel/arch/arm/configs/xxx_defconfig	(arm or arm64)
+	Add text:
+	CONFIG_SND_SOC_TFA98XX=y
+
+5. In sound/soc/msm/msm89xx.c(which one you used)
+	Modify text, for example:
+	in msm8x16_dai[]:
+		########## Playback settings: ##########
+		{
+			.name = LPASS_BE_QUAT_MI2S_RX,	/* which of the i2s playback your project used. */
+			.stream_name = "Quaternary MI2S Playback",
+			.cpu_dai_name = "msm-dai-q6-mi2s.3",
+			.platform_name = "msm-pcm-routing",
+			/* tfa98xx: nxp smart pa for speaker */
+			.codec_dai_name = "tfa98xx_codec",	/* Customize, based on what you have registered in platform. */
+			.codec_name = "tfa98xx.6-0034",		/* Customize, based on what you have registered in platform. */
+			.no_pcm = 1,
+			.dai_fmt = SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_CBS_CFS,
+			.be_id = MSM_BACKEND_DAI_QUATERNARY_MI2S_RX,
+			.be_hw_params_fixup = msm_be_hw_params_fixup,
+			.ops = &msm8x16_quat_mi2s_be_ops,
+			.ignore_pmdown_time = 1,
+			.ignore_suspend = 1,
+		},
+		########## FM settings(if needed): ##########
+		{
+			.name = "QUAT_MI2S Hostless",	/* whick i2s your project used. */
+			.stream_name = "QUAT_MI2S Hostless",
+			.cpu_dai_name = "QUAT_MI2S_RX_HOSTLESS",
+			.platform_name = "msm-pcm-hostless",
+			.dynamic = 1,
+			.trigger = {SND_SOC_DPCM_TRIGGER_POST,
+				SND_SOC_DPCM_TRIGGER_POST},
+			.no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
+			.ignore_suspend = 1,
+			.ignore_pmdown_time = 1,
+			/* tfa98xx: nxp smart pa for speaker */
+			.codec_dai_name = "tfa98xx_codec",	/* Customize, based on what you have registered in platform. */
+			.codec_name = "tfa98xx.6-0034",		/* Customize, based on what you have registered in platform. */
+		},
+	Note: Both codec_dai_name and codec_name:
+	you can get them in sound/soc/soc-core.c by log (you can add log to print them out):
+		a. dev_dbg(codec->dev, "ASoC: Registered codec '%s'\n", codec->name);
+		b. dev_dbg(dev, "ASoC: Registered DAI '%s'\n", dai->name);
+
+7. Switch prfole setting (In hardware):
+	Such as In hardware audio_hw.c (such as: hardware/qcom/audio/hal/audio_hw.c, which has function: select_devices.)
+	新增以下几个函数和调用：
+//////////////////////// add code for nxp smart pa ///////////////////////////////
+	/* For nxp smart pa tfa98xx to switch profile */
+	enum nxpSmartPAMode {
+		MUSIC_PRO = 0,
+		VOICE_PRO,
+	}
+
+	int setSpeakerPAProfile(int profile_type)
+	{
+		struct mixer_ctl * ctl;
+		const char *mixer_ctl_name = "left Profile";	// TODO: According to kernel mixer settings.
+		char *value = NULL;
+
+		if(profile_type == VOICE_PRO) {
+			value = "speech";	// TODO: According to kernel mixer settings.
+		} else if(profile_type == MUSIC_PRO) {
+			value = "music";	// TODO: According to kernel mixer settings.
+		}
+		ALOGI("tfa98xx: set profile[%s]: %s.", mixer_ctl_name, value);
+		ctl = mixer_get_ctl_by_name(adev->mixer, mixer_ctl_name);
+		if(!ctl) {
+			ALOGE("tfa98xx: %s: Could not get ctl for mixer command: %s", __func__, mixer_ctl_name);
+			return -EINVAL;
+		}
+		mixer_ctl_set_enum_by_string(ctl, value);
+		return 0;
+	}
+	/* For nxp smart pa tfa98xx to switch profile */
+//////////////////////// add code for nxp smart pa ///////////////////////////////
+
+	调用地方：
+	一般是在 select_devices 函数中根据当前 usecase type 去设置是 music profile 还是 voice profile
+	Modify code, example:
+		if(usecase->type == VOICE_CALL) || \
+				(usecase->type == VOIP_CALL) || \
+				(usecase->type == PCM_HFP_CALL)) {
+			TODO: Must double check the type of usacase is ok or not in your platform.
+			setSpeakerPAProfile(VOICE_PRO);
+		}
+		else {
+			setSpeakerPAProfile(MUSIC_PRO);
+		}
+
+	注意：以上几个 TODO 项请根据项目实际情况设置：
+	root@android:/ # tinymix "xxx Profile"
+	Note: xxx maybe left or mono or devkit and so on..
+
+	tinymix commmand 可以看下有几个 profile 可以使用，或者手动切换模式看下 kernel log 是否执行相应动作。
+
+Any questions pls contact me:
+email:
+nick.li@wpi-group.com
+
+telephone:
++86-136-3289-2058
+
+World Peace Industrial group, SZ.

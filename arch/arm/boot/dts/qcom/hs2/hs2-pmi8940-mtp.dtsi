@@ -1,0 +1,166 @@
+/*
+ * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include "hs2-mdss.dtsi"
+#include "hs2-pinctrl.dtsi"
+#include "hs2.dtsi"
+#include "hs2-audio.dtsi"
+#include "hs2-camera-sensor-mtp.dtsi"
+
+/{
+	mtp_batterydata: qcom,battery-data {
+		qcom,batt-id-range-pct = <20>; //change for battery detect 
+		#include "batterydata-tinno-2900mah-4400mv.dtsi"
+	};
+};
+
+&spmi_bus {
+	qcom,pmi8940@2 {
+		pmi8940_charger: qcom,qpnp-smbcharger {
+			qcom,usbin-vadc = <&pmi8940_vadc>;
+			qcom,iterm-ma = <150>;
+			qcom,float-voltage-mv = <4400>;
+			qcom,tinno-battery-capacity = <2900>;
+			/delete-property/ qcom,fastchg-current-ma;
+			qcom,thermal-mitigation = <1500 1200 1000 0>;
+			qcom,float-voltage-comp = <13>;
+			qcom,fastchg-current-comp = <700>;
+			qcom,no-parallel-defualt-dcp-icl-ma = <1400>;
+			qcom,no_support_qc;
+			qcom,override-usb-current;
+			qcom,speed-current = <1500 1400 1200 1100 900 700 600 450 400 0>;
+		};
+
+		pmi8940_fg: qcom,fg {
+			qcom,fg-cc-cv-threshold-mv = <4390>;
+			qcom,vbat-estimate-diff-mv =<200>;
+			qcom,fg-iterm-ma = <200>;
+			qcom,fg-chg-iterm-ma = <150>;
+			qcom,fg-cutoff-voltage-mv = <3400>;
+			qcom,ext-sense-type;
+			qcom,cold-hot-jeita-hysteresis = <0 0>;
+			qcom,thermal-coefficients =[c2 86 bb 50 cf 37];
+			qcom,capacity-learning-on;
+			qcom,hold-soc-while-full;
+		};
+
+		/delete-node/ leds@a100;
+		qcom,leds@a100 { 
+			compatible = "qcom,leds-qpnp"; 
+			reg = <0xa100 0x100>;
+			status = "okay";
+			qcom,led_mpp_2 {
+				label = "mpp"; 
+				linux,name = "green"; 
+				linux,default-trigger = "none"; 
+				qcom,default-state = "off"; 
+				qcom,max-current = <40>; 
+				qcom,current-setting = <10>; 
+				qcom,id = <6>; 
+				qcom,mode = "pwm"; 
+				qcom,source-sel = <8>; 
+				qcom,mode-ctrl = <0x60>; 
+				qcom,pwm-channel = <0>;
+				qcom,pwm-us = <5000000>;
+				pwms = <&pmi8940_pwm 0 0>; 
+				pwm-names="green";
+				qcom,use-blink;
+			};
+		};
+	};
+
+	qcom,pmi8940@3 {
+		status = "okay";
+		/delete-node/ pwm@b000;
+		pmi8940_pwm: pwm@b000 { 
+			compatible = "qcom,qpnp-pwm"; 
+			reg = <0xb000 0x100>; 
+			reg-names = "qpnp-lpg-channel-base"; 
+			qcom,channel-id = <0>; 
+			qcom,supported-sizes = <6>, <9>; 
+			qcom,period = <1000000>;
+			qcom,dtest-line = <1>; 
+			qcom,dtest-output = <1>; 
+			#pwm-cells = <2>;  
+			qcom,pwm { 
+				qcom,duty = <500000>;
+				label = "pwm"; 
+			}; 
+		};
+
+		wled: qcom,leds@d800 {
+			qcom,fs-curr-ua = <22500>;
+			/delete-property/ qcom,en-ext-pfet-sc-pro;
+		};
+
+		pmi_haptic: qcom,haptic@c000 {
+			qcom,actuator-type = "erm";
+			qcom,vmax-mv = <3000>;
+			/delete-property/ qcom,lra-auto-res-mode;
+			/delete-property/ qcom,lra-high-z;
+			/delete-property/ qcom,lra-res-cal-period;
+			/delete-property/ qcom,correct-lra-drive-freq;
+			/delete-property/ qcom,misc-trim-error-rc19p2-clk-reg-present;
+		};
+	};
+};
+
+&pmi8940_fg {
+	qcom,battery-data = <&mtp_batterydata>;
+	qcom,cold-bat-decidegc = <(0)>;
+	qcom,cool-bat-decidegc = <(150)>;
+	qcom,hot-bat-decidegc = <600>;
+	qcom,warm-bat-decidegc = <450>;	
+	qcom,bad-battery-detection-enable;
+};
+
+&pmi8940_charger {
+	qcom,battery-data = <&mtp_batterydata>;
+	qcom,chg-led-sw-controls;
+	qcom,chg-led-support;
+};
+
+&mdss_dsi0 {
+	lab-supply = <&lab_regulator>;
+	ibb-supply = <&ibb_regulator>;
+};
+
+&labibb {
+	status = "ok";
+	qpnp,qpnp-labibb-mode = "lcd";
+};
+
+&ibb_regulator {
+	qcom,qpnp-ibb-discharge-resistor = <32>;
+};
+
+&dsi_panel_pwr_supply {
+	qcom,panel-supply-entry@2 {
+		reg = <2>;
+		qcom,supply-name = "lab";
+		qcom,supply-min-voltage = <4600000>;
+		qcom,supply-max-voltage = <6000000>;
+		qcom,supply-enable-load = <100000>;
+		qcom,supply-disable-load = <100>;
+	};
+
+	qcom,panel-supply-entry@3 {
+		reg = <3>;
+		qcom,supply-name = "ibb";
+		qcom,supply-min-voltage = <4600000>;
+		qcom,supply-max-voltage = <6000000>;
+		qcom,supply-enable-load = <100000>;
+		qcom,supply-disable-load = <100>;
+		qcom,supply-post-on-sleep = <20>;
+	};
+};

@@ -1,0 +1,48 @@
+qcom,tinno-2900mah {
+	/* #2515179_HYHY_V12BN_LITE_2900mAh_averaged_MasterSlave_Jun26th2017*/
+	qcom,max-voltage-uv = <4400000>;
+	qcom,nom-batt-capacity-mah = <2900>;
+	qcom,batt-id-kohm = <100>;
+	qcom,battery-beta = <3435>;
+	qcom,battery-type = "V12BN_LITE_2900mAh";
+	qcom,chg-rslow-comp-c1 = <3509951>;
+	qcom,chg-rslow-comp-c2 = <5242299>;
+	qcom,chg-rs-to-rslow = <1085362>;
+	qcom,chg-rslow-comp-thr = <0xAB>;
+	qcom,checksum = <0xC80F>;
+	qcom,gui-version = "PMI8950GUI - 2.0.0.16";
+	qcom,fg-profile-data = [
+		 00 88 14 7E 
+		 25 82 B3 7C 
+		 60 83 BC 6D 
+		 12 88 32 8E 
+		 41 82 68 98 
+		 D4 B5 2B C1 
+		 58 18 06 88 
+		 1F 7E 26 82 
+		 B3 7C 5A 83 
+		 15 61 89 80 
+		 91 8C 4A 82 
+		 D4 99 32 BD 
+		 4E CA 59 0E 
+		 74 0B DA 59 
+		 14 70 C6 FD 
+		 34 1D D5 44 
+		 CE 34 00 00 
+		 F3 47 16 10 
+		 56 3A 00 00 
+		 00 00 00 00 
+		 00 00 00 00 
+		 80 71 0B 70 
+		 1C 84 AC 80 
+		 57 7C 5C 71 
+		 87 66 2F 80 
+		 F4 74 A4 68 
+		 F7 42 3C A1 
+		 29 97 62 A1 
+		 64 A0 71 0C 
+		 28 00 FF 36 
+		 F0 11 30 03 
+		 00 00 00 0C 
+	];
+};

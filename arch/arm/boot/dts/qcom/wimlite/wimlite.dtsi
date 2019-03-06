@@ -1,0 +1,303 @@
+/*
+ * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include "wimlite-mdss-panels.dtsi"
+#include "wimlite-pinctrl.dtsi"
+#include "wimlite-audio.dtsi"
+#include "wimlite-camera-sensor.dtsi"
+
+/delete-node/ &mtp_batterydata;
+
+/{
+	mtp_batterydata: qcom,battery-data {
+		qcom,batt-id-range-pct = <100>; 
+		#include "batterydata-tinno-3000mah-4400mv.dtsi"
+	};
+
+	aliases {
+		spi6 = &spi_6;
+	};
+
+};
+
+&other_ext_mem {
+	reg = <0x0 0x84A00000 0x0 0x1E00000>;
+	
+};
+
+&qcom_seecom {
+	reg = <0x84A00000 0x1900000>;
+};
+
+&spmi_bus {
+	qcom,pmi8950@2 {
+		pmi8950_gpios: gpios {
+			gpio@c100 {
+				qcom,output-type = <2>;
+				qcom,pull = <1>;
+				qcom,vin-sel = <0>;
+				qcom,out-strength = <2>;
+				/delete-property/ status;
+			};
+		};
+
+		pmi8950_charger: qcom,qpnp-smbcharger {
+			qcom,iterm-ma = <250>;
+			qcom,float-voltage-mv = <4400>;
+			qcom,fastchg-current-ma = <1500>;
+			qcom,thermal-mitigation = <1500 1200 1000 0>;
+			/delete-property/ qcom,parallel-usb-min-current-ma;
+			/delete-property/ qcom,parallel-usb-9v-min-current-ma;
+			/delete-property/ qcom,parallel-allowed-lowering-ma;
+			qcom,float-voltage-comp = <13>; //4100v
+			qcom,fastchg-current-comp = <700>; //900ma
+			qcom,jeita-adjust-float-voltage-comp;
+			qcom,no-parallel-defualt-dcp-icl-ma = <1400>;
+			qcom,no_support_qc;
+			qcom,speed-current = <1500 1400 1200 1100 900 700 600 450 400 0>;
+		};
+
+		pmi8950_fg: qcom,fg {
+			qcom,fg-cc-cv-threshold-mv = <4390>;
+			qcom,hold-soc-while-full;
+			qcom,vbat-estimate-diff-mv =<120>;
+			qcom,resume-soc = <98>;
+			qcom,fg-iterm-ma = <300>;
+			qcom,fg-chg-iterm-ma = <250>;
+			qcom,fg-cutoff-voltage-mv = <3400>;
+			qcom,ext-sense-type;
+			qcom,fg-delta-soc = <1>;
+			qcom,thermal-coefficients =[c8 86 c1 50 d3 37];
+		};
+
+		/delete-node/ qcom,leds@a100;
+		qcom,leds@a100 {
+			compatible = "qcom,leds-qpnp";
+			reg = <0xa100 0x100>;
+			status = "okay";
+			qcom,led_mpp_2 {
+			label = "mpp";
+				linux,name = "green";
+				linux,default-trigger = "none";
+				qcom,default-state = "off";
+				qcom,max-current = <40>;
+				qcom,current-setting = <10>;
+				qcom,id = <6>;
+				qcom,mode = "pwm";
+				qcom,source-sel = <8>;
+				qcom,mode-ctrl = <0x60>;
+				qcom,pwm-channel = <0>;
+				qcom,pwm-us = <5000000>;
+				pwms = <&pmi8950_pwm 0 0>;
+				pwm-names="green";
+				qcom,use-blink;
+			};
+		};
+	};
+
+	qcom,pmi8950@3 {
+		/delete-node/ pmi8950_pwm;
+		pmi8950_pwm: pwm@b000 {
+				compatible = "qcom,qpnp-pwm";
+				reg = <0xb000 0x100>;
+				reg-names = "qpnp-lpg-channel-base";
+				qcom,channel-id = <0>;
+				qcom,supported-sizes = <6>, <9>;
+				qcom,period = <1000000>;
+				qcom,dtest-line = <1>;
+				qcom,dtest-output = <1>;
+				#pwm-cells = <2>;
+				qcom,pwm {
+				qcom,duty = <500000>;
+				label = "pwm";};
+		};
+
+		wled: qcom,leds@d800 {
+			qcom,fs-curr-ua = <23000>;
+			/delete-property/ qcom,en-ext-pfet-sc-pro;
+		};
+
+		pmi_haptic: qcom,haptic@c000 {
+			qcom,vmax-mv = <3000>;
+		};
+	};
+};
+
+&soc {
+
+	/delete-node/ hbtp;
+
+	spi_6: spi@7af6000 { /* BLSP1 QUP3 */
+		compatible = "qcom,spi-qup-v2";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg-names = "spi_physical", "spi_bam_physical";
+		reg = <0x7af6000 0x600>,
+			<0x7AC4000 0x1f000>;
+		interrupt-names = "spi_irq", "spi_bam_irq";
+		interrupts = <0 300 0>, <0 239 0>;
+		spi-max-frequency = <19200000>;
+		clocks = <&clock_gcc clk_gcc_blsp2_ahb_clk>,
+			<&clock_gcc clk_gcc_blsp2_qup2_spi_apps_clk>;
+		clock-names = "iface_clk", "core_clk";
+		qcom,infinite-mode = <0>;
+		qcom,use-bam;
+		qcom,use-pinctrl;
+		qcom,ver-reg-exists;
+		qcom,bam-consumer-pipe-index = <6>;
+		qcom,bam-producer-pipe-index = <7>;
+		qcom,master-id = <84>;
+	};
+
+	hall-ic{
+		compatible = "hall-switch";
+		interrupt-parent = <&tlmm>;
+		interrupts = <126 0x0>;
+		vddio-supply = <&pm8937_l6>;
+		linux,gpio-int = <&tlmm 126 0x1>;
+		linux,wakeup;
+		linux,min-uv = <1800000>;
+		linux,max-uv = <1800000>;
+	};
+
+	qcom_fp{
+		status = "ok";
+		compatible = "qcom,fingerprint";
+		vdd-supply = <&pm8937_l10>;
+		vio-supply = <&pm8937_l6>;
+		reg = <0 0>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <17 0x1>;
+		qcom,irq-gpio = <&tlmm 12 0x00>;
+		qcom,reset-gpio = <&tlmm 13 0x00>;
+		qcom,fpid-gpio = <&tlmm 25 0x00>;
+		pinctrl-names = "tlmm_gpio_fpid_active";
+		pinctrl-0 = <&gpio_fpid_active>;
+		spi-max-frequency = <8000000>;
+	};
+
+	qcom_fp_chipone{
+		status = "ok";
+		compatible = "qcom,fingerprint-chipone";
+		vdd-supply = <&pm8937_l10>;
+		vio-supply = <&pm8937_l6>;
+		reg = <0 0>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <12 0x1>;
+		qcom,irq-gpio = <&tlmm 12 0x00>;
+		qcom,reset-gpio = <&tlmm 13 0x00>;
+        qcom,fpid-gpio = <&tlmm 25 0x00>;
+        pinctrl-names = "tlmm_gpio_fpid_active";
+        pinctrl-0 = <&gpio_fpid_active>;
+		spi-max-frequency = <8000000>;
+	};
+};
+
+&i2c_3 {
+	status = "ok";
+		focaltech@38 {
+			compatible = "focaltech,5x06";
+			reg = <0x38>;
+			interrupt-parent = <&tlmm>;
+			interrupts = <65 0x2008>;
+			vdd-supply = <&pm8937_l10>;
+			vcc_i2c-supply = <&pm8937_l5>;
+			pinctrl-names = "pmx_ts_active","pmx_ts_suspend";
+			pinctrl-0 = <&ts_int_active &ts_reset_active>;
+			pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
+			focaltech,name = "ft6436";
+			focaltech,family-id = <0x36>;
+			focaltech,irq-gpio = <&tlmm 65 0x0>;
+			focaltech,reset-gpio = <&tlmm 64 0x0>;
+			focaltech,display-coords = <0 0 1080 1920>;
+			focaltech,panel-coords = <0 0 1080 1920>;
+			focaltech,no-force-update;
+			focaltech,i2c-pull-up;
+			focaltech,group-id = <1>;
+			focaltech,hard-reset-delay-ms = <20>;
+			focaltech,soft-reset-delay-ms = <200>;
+			focaltech,num-max-touches = <5>;
+			focaltech,fw-delay-aa-ms = <30>;
+			focaltech,fw-delay-55-ms = <30>;
+			focaltech,fw-upgrade-id1 = <0x79>;
+			focaltech,fw-upgrade-id2 = <0x18>;
+			focaltech,fw-delay-readid-ms = <10>;
+			focaltech,fw-delay-era-flsh-ms = <2000>;
+			focaltech,fw-auto-cal;
+			focaltech,ignore-id-check;
+		};
+};
+
+&i2c_2{
+	status = "okay";
+	qcom,clk-freq-out = <100000>;
+
+	/delete-node/ pericom-type-c@1d;
+	/delete-node/ adv7533@39;
+
+	tfa98xx@34 {
+		compatible = "nxp,tfa9890";
+		reg = <0x34>;
+		pinctrl-names = "tlmm_gpio_key_active_reset_pa","tlmm_gpio_key_suspend_reset_pa";
+		pinctrl-0 = <&gpio_key_active_reset_pa>;
+		pinctrl-1 = <&gpio_key_suspend_reset_pa>;
+		nxp,reset-gpio = <&tlmm 89 0x0>;
+		nxp,irq-gpio = <&tlmm 90 0x0>;
+		status = "okay";
+	};
+};
+
+&i2c_5 { /* BLSP2 QUP1 */
+	nq@28 {
+		qcom,nq-firm = <&tlmm 61 0x00>;
+	};
+};
+
+&spi_3 {
+	status="disabled";
+};
+
+&pmi8950_fg {
+	qcom,cold-bat-decidegc = <(0)>;
+	qcom,cool-bat-decidegc = <(100)>;
+	qcom,hot-bat-decidegc = <600>;
+	qcom,warm-bat-decidegc = <450>;
+	qcom,bad-battery-detection-enable;
+};
+
+&pmi_haptic{
+	/delete-property/ qcom,lra-auto-res-mode;
+	/delete-property/ qcom,lra-high-z;
+	/delete-property/ qcom,lra-res-cal-period;
+	/delete-property/ qcom,correct-lra-drive;
+	qcom,actuator-type = "erm";
+};
+
+&sdhc_2 {
+	cd-gpios = <&tlmm 67 0x0>;
+};
+
+&pmi8950_pwm {
+	status = "ok";
+	qcom,period = <1000000>;
+	qcom,dtest-line = <1>;
+	qcom,dtest-output = <1>;
+	qcom,pwm {
+		qcom,duty = <500000>; 
+		label = "pwm";
+	};
+};
+
+&usb_otg {
+		qcom,hsusb-otg-phy-init-seq = <0x73 0x80 0x35 0x81 0x3f 0x82 0x13 0x83 0xffffffff>; /*USB eye chart*/
+};

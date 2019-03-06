@@ -1,0 +1,160 @@
+/*
+ * Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/ {
+	reserved-memory {
+		other_ext_mem: other_ext_region@0 {
+			reg = <0x0 0x84A00000 0x0 0x1E00000>;
+		};
+	};
+};
+
+&i2c_3 {
+		focaltech@38 {
+			compatible = "focaltech,5446";
+			reg = <0x38>;
+			interrupt-parent = <&tlmm>;
+			interrupts = <65 0x2008>;
+			vdd-supply = <&pm8917_l22>;
+			vcc_i2c-supply = <&pm8917_l5>;
+			/* pins used by touchscreen */
+			pinctrl-names = "pmx_ts_active","pmx_ts_suspend";
+			pinctrl-0 = <&ts_int_active &ts_reset_active>;
+			pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
+			focaltech,irq-gpio = <&tlmm 65 0x0>;
+			focaltech,reset-gpio = <&tlmm 64 0x0>;
+			focaltech,max-touch-number = <5>;
+			focaltech,display-coords = <0 0 720 1440>;
+			focaltech,key-number = <3>;
+			focaltech,keys = <139 102 158>;
+			focaltech,key-y-coord = <2000>;
+			focaltech,key-x-coords = <200 600 800>;
+			focaltech,fw-auto-update;
+		};
+};
+
+&soc {
+	hall-ic {
+		compatible = "hall-switch";
+		interrupt-parent = <&tlmm>;
+		interrupts = <12 0x0>;
+		vddio-supply = <&pm8917_l6>;
+		linux,gpio-int = <&tlmm 12 0x1>;
+		linux,wakeup;
+		linux,min-uv = <1800000>;
+		linux,max-uv = <1800000>;
+	};
+	
+	qcom_fp {
+		status = "ok";
+		compatible = "qcom,fingerprint";
+		vdd-supply = <&pm8917_l10>;
+		vio-supply = <&pm8917_l6>;
+		reg = <0>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <17 0x1>;
+		qcom,fpid-gpio = <&tlmm 16 0x00>;
+		qcom,irq-gpio = <&tlmm 17 0x00>;
+		qcom,reset-gpio = <&tlmm 19 0x00>;
+		pinctrl-names = "tlmm_gpio_fpid_active";
+		pinctrl-0 = <&gpio_fpid_active>;
+		spi-max-frequency = <8000000>;
+	};
+
+	qcom_fp_chipone {
+		status = "ok";
+		compatible = "qcom,fingerprint-chipone";
+		vdd-supply = <&pm8917_l10>;
+		vio-supply = <&pm8917_l6>;
+		reg = <0>;
+		interrupt-parent = <&tlmm>;
+		interrupts = <17 0x1>;
+		qcom,irq-gpio = <&tlmm 17 0x00>;
+		qcom,reset-gpio = <&tlmm 19 0x00>;
+		qcom,fpid-gpio = <&tlmm 16 0x00>;
+		pinctrl-names = "tlmm_gpio_fpid_active";
+		pinctrl-0 = <&gpio_fpid_active>;
+		spi-max-frequency = <8000000>;
+	};
+
+	qcom,bcl {
+		qcom,bcl-hotplug-list = <&CPU3>;
+		qcom,bcl-soc-hotplug-list = <&CPU3>;
+		qcom,ibat-monitor {
+			qcom,mitigation-freq-khz = <1401000>;
+		};
+	};
+
+	i2c_3: i2c@78b7000 { /* BLSP1 QUP3 */
+		/delete-property/ status;
+	};
+
+	usb_otg: usb@78db000 {
+		qcom,floated-charger-enable = <1>;
+		qcom,usbin-vadc = <&pmi8940_vadc>;
+	};
+
+	/delete-node/ qseecom@85b00000;
+	qcom_seecom: qseecom@84A00000{
+		compatible = "qcom,qseecom";
+    reg = <0x84A00000 0x1900000>;
+		reg-names = "secapp-region";
+		qcom,hlos-num-ce-hw-instances = <1>;
+		qcom,hlos-ce-hw-instance = <0>;
+		qcom,qsee-ce-hw-instance = <0>;
+		qcom,disk-encrypt-pipe-pair = <2>;
+		qcom,support-fde;
+		qcom,msm-bus,name = "qseecom-noc";
+		qcom,msm-bus,num-cases = <4>;
+		qcom,msm-bus,num-paths = <1>;
+		qcom,support-bus-scaling;
+		qcom,msm-bus,vectors-KBps =
+			<55 512 0 0>,
+			<55 512 0 0>,
+			<55 512 120000 1200000>,
+			<55 512 393600 3936000>;
+		clocks = <&clock_gcc clk_crypto_clk_src>,
+			 <&clock_gcc clk_gcc_crypto_clk>,
+			 <&clock_gcc clk_gcc_crypto_ahb_clk>,
+			 <&clock_gcc clk_gcc_crypto_axi_clk>;
+		clock-names = "core_clk_src", "core_clk",
+				"iface_clk", "bus_clk";
+		qcom,ce-opp-freq = <100000000>;
+	};
+};
+
+&mdss_dsi0 {
+	qcom,dsi-pref-prim-pan = <&dsi_ili9881c_720_1440_vid>;
+	/delete-property/ qcom,platform-te-gpio;
+	qcom,platform-enable-gpio = <&tlmm 68 0>;
+	/delete-property/ qcom,platform-bklight-en-gpio;
+	qcom,irq-te-tinno-vio = <&tlmm 24 0>;
+};
+
+&mdss_fb0{
+	qcom,tinno-brightness-level = <1>;	
+};
+
+/delete-node/ &dsi_truly_720_vid;
+/delete-node/ &dsi_truly_720_cmd;
+&dsi_ili9881c_720_1440_vid {
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
+};
+
+&dsi_icn9706_720_1440_vid {
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
+};
+
+&sdhc_2 {
+	cd-gpios = <&tlmm 67 0x0>;
+};

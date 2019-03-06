@@ -1,0 +1,29 @@
+/* Copyright (c) 2015-2016, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include "dsi-panel-icn9706-720-1440p-video.dtsi"
+#include "dsi-panel-ili9881c-720-1440p-video.dtsi"
+
+&mdss_dsi0{
+
+	/delete-property/ qcom,platform-bklight-en-gpio;
+	/delete-property/ vdd-supply;
+	qcom,dsi-pref-prim-pan = <&dsi_ili9881c_720_1440p_video>;
+	qcom,platform-enable-gpio = <&tlmm 68 0>;
+};
+
+&dsi_icn9706_720_1440_vid{
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
+};
+&dsi_ili9881c_720_1440p_video{
+	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
+};

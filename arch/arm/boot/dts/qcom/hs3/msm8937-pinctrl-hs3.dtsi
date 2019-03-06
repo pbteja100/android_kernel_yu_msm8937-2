@@ -1,0 +1,103 @@
+/*
+ * Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&tlmm {
+		tlmm_gpio_fpid {
+		gpio_fpid_active: gpio_fpid_active {
+			mux {
+				pins = "gpio16";
+				function = "gpio";
+			};
+			config {
+				pins = "gpio16";
+				drive-strength = <2>;
+				bias-disable;
+			};
+		};
+	};
+	/delete-node/ cam_sensor_rear_vdig;
+	/delete-node/ cam_sensor_rear_vdig_sleep;
+
+	cam_sensor_rear_vdig: cam_sensor_rear_vdig {
+			mux {
+				pins = "gpio126";
+				function = "gpio";
+			};
+			config {
+				pins = "gpio126";
+				bias-disable;
+				drive-strength = <2>;
+			};
+	};
+
+	cam_sensor_rear_vdig_sleep: cam_sensor_rear_vdig_sleep {
+			mux {
+				pins = "gpio126";
+				function = "gpio";
+			};
+			config {
+				pins = "gpio126";
+				bias-disable;
+				drive-strength = <2>;
+			};
+	};
+
+	cam_sensor_rear_vana: cam_sensor_rear_vana {
+			mux {
+				pins = "gpio125";
+				function = "gpio";
+			};
+			config {
+				pins = "gpio125";
+				bias-disable;
+				drive-strength = <2>;
+			};
+	};
+
+	cam_sensor_rear_vana_sleep: cam_sensor_rear_vana_sleep {
+			mux {
+				pins = "gpio125";
+				function = "gpio";
+			};
+			config {
+				pins = "gpio125";
+				bias-disable;
+				drive-strength = <2>;
+			};
+	};
+
+	cam_sensor_front_vana: cam_sensor_front_vana {
+			mux {
+				pins = "gpio8";
+				function = "gpio";
+			};
+			config {
+				pins = "gpio8";
+				bias-disable;
+				drive-strength = <2>;
+			};
+	};
+
+	cam_sensor_front_vana_sleep: cam_sensor_front_vana_sleep {
+			mux {
+				pins = "gpio8";
+				function = "gpio";
+			};
+			config {
+				pins = "gpio8";
+				bias-disable;
+				drive-strength = <2>;
+			};
+	};
+
+};

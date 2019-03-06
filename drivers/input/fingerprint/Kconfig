@@ -1,0 +1,45 @@
+#
+# fingerprint driver configuration
+#
+
+config INPUT_FINGERPRINT
+  bool INPUT_FINGERPRINT
+  default n
+  help
+    Switch for tinno fingerprint
+
+config FINGERPRINT_GOODIX_GF32X8_QSEE
+  bool FINGERPRINT_GOODIX_GF32X8_QSEE
+  default n
+  help
+    Goodix Fingerprint chip GF316M/GF318M/GF3118M/GF518M/GF5118M/GF516M/GF816M/GF3208/GF3206/GF3266/GF3288/GF5206/GF5216/GF5208 TEE driver
+
+config FINGERPRINT_GOODIX_GF316M
+  bool FINGERPRINT_GOODIX_GF316M
+  default n
+  help
+    Goodix Fingerprint chip GF316M Driver
+
+config FINGERPRINT_ELAN_96SA_QSEE
+  bool FINGERPRINT_ELAN_96SA_QSEE
+  default n
+  help
+    elan Fingerprint chip 96sa/80sa for QSEE
+
+config FINGERPRINT_ELAN_519C_QSEE
+  bool FINGERPRINT_ELAN_519C_QSEE
+  default n
+  help
+    elan Fingerprint chip 519c for QSEE
+
+config FINGERPRINT_SILEAD_6163_QSEE
+  bool FINGERPRINT_SILEAD_6163_QSEE
+  default n
+  help
+    silead Fingerprint chip 6163 for QSEE
+
+config FINGERPRINT_CHIPONE_7152_QSEE
+  bool FINGERPRINT_CHIPONE_7152_QSEE
+  default n
+  help
+    chipone Fingerprint chip 7152 for QSEE

@@ -1,0 +1,73 @@
+/*
+ * Copyright (c) 2015-2016, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+&tlmm {
+
+	i2c_3_sleep {
+		config {
+			bias-pull-down;
+		};
+	};
+
+	tlmm_gpio_compatible_control_pa {
+		gpio_key_active_compatible_control_pa: gpio_key_active_compatible_control_pa {
+			mux {
+				pins = "gpio89";
+				function = "gpio";
+			};
+			config {
+				pins = "gpio89";
+				drive-strength = <16>;
+				bias-pull-down;
+				output-low;
+			};
+		};
+
+		gpio_key_suspend_compatible_control_pa: gpio_key_suspend_compatible_control_pa {
+			mux {
+				pins = "gpio89";
+				function = "gpio";
+			};
+			config {
+				pins = "gpio89";
+				drive-strength = <16>;
+				bias-pull-down;
+				output-low;
+			};
+		};
+	};
+
+	cam_sensor_rear_vana: cam_sensor_rear_vana {
+		/* VANA */
+		mux {
+			pins = "gpio125";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio125";
+			bias-disable; /* No PULL */
+			drive-strength = <2>; /* 2 MA */
+		};
+	};
+	cam_sensor_rear_vana_sleep: cam_sensor_rear_vana_sleep {
+		/* VANA */
+		mux {
+			pins = "gpio125";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio125";
+			bias-disable; /* No PULL */
+			drive-strength = <2>; /* 2 MA */
+		};
+	};
+};
